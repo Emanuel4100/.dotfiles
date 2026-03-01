@@ -1,69 +1,139 @@
 {
     "layer": "top",
     "position": "top",
-    "mod": "dock",
+    "height": 36,
+    "spacing": 4,
     "exclusive": true,
     "passthrough": false,
     "gtk-layer-shell": true,
-    "height": 0,
+
     "modules-left": [
+        "custom/launcher",
         "hyprland/workspaces",
-        "mpris"
+        "hyprland/window"
     ],
+    
     "modules-center": [
         "clock"
     ],
+
     "modules-right": [
         "tray",
         "network",
+        "bluetooth",
         "pulseaudio",
         "battery",
         "custom/power"
     ],
 
+    "custom/launcher": {
+        "format": "",
+        "on-click": "rofi -show drun",
+        "tooltip": true,
+        "tooltip-format": "Open Application Launcher"
+    },
+
     "hyprland/workspaces": {
         "disable-scroll": true,
         "all-outputs": true,
         "on-click": "activate",
-        "format": "{name}"
+        "format": "{icon}",
+        "format-icons": {
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "urgent": "",
+            "active": "",
+            "default": ""
+        }
     },
 
-    "mpris": {
-        "player": "spotify",
-        "format": "  {dynamic}",
-        "format-paused": "   <i>{dynamic}</i>",
-        "dynamic-len": 40,
-        "on-click": "playerctl -p spotify play-pause",
-        "on-click-right": "bash ~/.config/waybar/scripts/spotify_menu.sh"
+    "hyprland/window": {
+        "format": "{}",
+        "max-length": 50,
+        "rewrite": {
+            "": "Desktop"
+        }
     },
 
     "clock": {
-        "format": " {:%H:%M   %d/%m}",
-        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+        "format": " {:%I:%M %p}",
+        "format-alt": " {:%A, %B %d, %Y}",
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "calendar": {
+            "mode"          : "year",
+            "mode-mon-col"  : 3,
+            "weeks-pos"     : "right",
+            "on-scroll"     : 1,
+            "format": {
+                "months":     "<span color='#cdd6f4'><b>{}</b></span>",
+                "days":       "<span color='#bac2de'><b>{}</b></span>",
+                "weeks":      "<span color='#89dceb'><b>W{}</b></span>",
+                "weekdays":   "<span color='#f9e2af'><b>{}</b></span>",
+                "today":      "<span color='#f38ba8'><b><u>{}</u></b></span>"
+            }
+        }
+    },
+
+    "tray": {
+        "icon-size": 18,
+        "spacing": 10
     },
 
     "network": {
-        "format-wifi": " {essid}",
-        "format-ethernet": "{ipaddr}/{cidr} ",
-        "format-disconnected": "Disconnected ⚠"
+        "format-wifi": " {signalStrength}%",
+        "format-ethernet": "󰈀 Wired",
+        "format-disconnected": "󰤮 Disconnected",
+        "tooltip-format": "{ifname} via {gwaddr}",
+        "tooltip-format-wifi": "{essid} ({signalStrength}%)",
+        "on-click": "nm-connection-editor"
+    },
+
+    "bluetooth": {
+        "format": "",
+        "format-disabled": "󰂲",
+        "format-connected": "󰂱 {device_alias}",
+        "tooltip-format": "{controller_alias}\n{num_connections} connected",
+        "on-click": "blueman-manager"
     },
 
     "pulseaudio": {
         "format": "{icon} {volume}%",
-        "format-muted": " Muted",
-        "on-click": "pamixer -t",
+        "format-muted": "󰝟 Muted",
+        "format-bluetooth": "{icon} {volume}%",
         "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
             "default": ["", "", ""]
-        }
+        },
+        "on-click": "pavucontrol",
+        "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+        "on-scroll-up": "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+",
+        "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
     },
 
     "battery": {
-        "format": "  {capacity}%"
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-charging": "󰂄 {capacity}%",
+        "format-plugged": " {capacity}%",
+        "format-alt": "{icon} {time}",
+        "format-icons": ["", "", "", "", ""]
     },
 
-   "custom/power": {
-    "format": "⏻",
-    "on-click": "wlogout",
-    "tooltip": false
-   }
+    "custom/power": {
+        "format": "⏻",
+        "on-click": "wlogout",
+        "tooltip": true,
+        "tooltip-format": "Power Menu"
+    }
 }
