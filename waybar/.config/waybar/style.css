@@ -38,6 +38,16 @@ tooltip {
     border-radius: 10px;
 }
 
+#mpris {
+    background-color: transparent; /* Makes the background invisible */
+    color: #cdd6f4; /* Light text color so you can read it */
+    padding: 0 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 10px;
+    font-weight: bold;
+}
+
 #clock,
 #battery,
 #cpu,

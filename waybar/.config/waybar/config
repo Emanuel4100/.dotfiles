@@ -7,10 +7,12 @@
     "gtk-layer-shell": true,
     "height": 0,
     "modules-left": [
-        "clock",
-        "hyprland/workspaces"
+        "hyprland/workspaces",
+        "mpris"
     ],
-    "modules-center": ["hyprland/window"],
+    "modules-center": [
+        "clock"
+    ],
     "modules-right": [
         "tray",
         "network",
@@ -18,48 +20,43 @@
         "battery"
     ],
 
-    "hyprland/window": {
-        "format": "{}"
-    },
     "hyprland/workspaces": {
         "disable-scroll": true,
         "all-outputs": true,
         "on-click": "activate",
         "format": "{name}"
     },
-    "tray": {
-        "icon-size": 13,
-        "spacing": 10
+
+    "mpris": {
+        "player": "spotify",
+        "format": "  {dynamic}",
+        "format-paused": "   <i>{dynamic}</i>",
+        "dynamic-len": 40,
+        "on-click": "playerctl -p spotify play-pause",
+        "on-click-right": "bash ~/.config/waybar/scripts/spotify_menu.sh"
     },
+
     "clock": {
-        "format": "{: %R   %d/%m}",
+        "format": " {:%H:%M   %d/%m}",
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
     },
 
     "network": {
         "format-wifi": " {essid}",
         "format-ethernet": "{ipaddr}/{cidr} ",
-        "tooltip-format": "{ifname} via {gwaddr} ",
-        "format-linked": "{ifname} (No IP) ",
-        "format-disconnected": "Disconnected ⚠",
-        "format-alt": "{ifname}: {ipaddr}/{cidr}"
+        "format-disconnected": "Disconnected ⚠"
     },
+
     "pulseaudio": {
         "format": "{icon} {volume}%",
-        "tooltip": false,
         "format-muted": " Muted",
         "on-click": "pamixer -t",
-        "on-scroll-up": "pamixer -i 5",
-        "on-scroll-down": "pamixer -d 5",
-        "scroll-step": 5,
         "format-icons": {
-            "headphone": "",
-            "hands-free": "",
-            "headset": "",
-            "phone": "",
-            "portable": "",
-            "car": "",
             "default": ["", "", ""]
         }
+    },
+
+    "battery": {
+        "format": "  {capacity}%"
     }
 }
