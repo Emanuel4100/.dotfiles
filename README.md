@@ -1,4 +1,4 @@
-# Emanuel's Hyprland dotfiles
+# Emanuel's  dotfiles
 My Hyprland dotfiles to my own OS experience
 ## Default Components -
 ### Essentials
