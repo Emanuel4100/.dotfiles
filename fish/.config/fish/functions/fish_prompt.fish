@@ -9,7 +9,7 @@ function fish_prompt
     set -l white abb2bf
 
     # Icons
-    set -l icon_os " " # Change based on your OS
+    set -l icon_os "  " # Change based on your OS
     set -l icon_dir " "
     set -l icon_git " "
     set -l separator ""
