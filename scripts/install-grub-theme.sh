@@ -20,8 +20,21 @@ sudo rm -rf "$THEME_DEST"
 sudo cp -r "$THEME_SOURCE" /boot/grub2/themes/
 
 echo "Configuring /etc/default/grub..."
+
 # Update the terminal output to gfxterm
-sudo sed -i 's/^GRUB_TERMINAL_OUTPUT=.*/GRUB_TERMINAL_OUTPUT="gfxterm"/' "$GRUB_DEFAULT"
+if grep -q "^GRUB_TERMINAL_OUTPUT=" "$GRUB_DEFAULT"; then
+    sudo sed -i 's/^GRUB_TERMINAL_OUTPUT=.*/GRUB_TERMINAL_OUTPUT="gfxterm"/' "$GRUB_DEFAULT"
+else
+    echo 'GRUB_TERMINAL_OUTPUT="gfxterm"' | sudo tee -a "$GRUB_DEFAULT" > /dev/null
+fi
+
+# Set GRUB_DISABLE_SUBMENU to false to clean up the menu
+echo "Grouping older kernels into a submenu..."
+if grep -q "^GRUB_DISABLE_SUBMENU=" "$GRUB_DEFAULT"; then
+    sudo sed -i 's/^GRUB_DISABLE_SUBMENU=.*/GRUB_DISABLE_SUBMENU=false/' "$GRUB_DEFAULT"
+else
+    echo 'GRUB_DISABLE_SUBMENU=false' | sudo tee -a "$GRUB_DEFAULT" > /dev/null
+fi
 
 # Remove any existing GRUB_THEME lines to avoid duplicates
 sudo sed -i '/^GRUB_THEME=/d' "$GRUB_DEFAULT"
@@ -32,4 +45,4 @@ echo 'GRUB_THEME="/boot/grub2/themes/fedora/theme.txt"' | sudo tee -a "$GRUB_DEF
 echo "Generating new GRUB config file..."
 sudo grub2-mkconfig -o /boot/grub2/grub.cfg
 
-echo "Done! Your GRUB theme has been successfully installed."
+echo "Done! Your GRUB theme is installed and the menu is cleaned up."
