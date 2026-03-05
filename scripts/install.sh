@@ -121,4 +121,9 @@ echo "Changing default shell to fish..."
 # This might prompt you for your user password
 chsh -s /usr/bin/fish
 
+# Adding My custom aliases (for fish)
+echo "Adding custom aliases..."
+alias --save files="nautilus ."
+
+
 echo "✅ Installation script finished successfully!"
