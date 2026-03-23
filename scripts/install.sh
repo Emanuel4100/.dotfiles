@@ -72,11 +72,10 @@ fi
 # ==========================================
 # FLATPAK & FLATHUB
 # ==========================================
-if ask_install "Flatpak Apps (Spotify, Obsidian, Resources, etc)"; then
+if ask_install "Flatpak Apps (Obsidian, Resources, etc)"; then
     $SUDO dnf install -y flatpak
     flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
     FLATPAK_APPS=(
-        "com.spotify.Client"
         "com.github.tchx84.Flatseal"
         "io.github.giantpinkrobots.flathub.ExtensionManager"
         "md.obsidian.Obsidian"
@@ -84,6 +83,27 @@ if ask_install "Flatpak Apps (Spotify, Obsidian, Resources, etc)"; then
         "net.nokyan.Resources"
     )
     flatpak install -y flathub "${FLATPAK_APPS[@]}"
+fi
+
+# ==========================================
+# SNAP & SPOTIFY
+# ==========================================
+if ask_install "Snap Apps (Spotify)"; then
+    echo "Installing snapd..."
+    $SUDO dnf install -y snapd
+    $SUDO systemctl enable --now snapd.socket
+    
+    # Fedora requires this symlink for classic snap support
+    if [ ! -L /snap ]; then
+        $SUDO ln -s /var/lib/snapd/snap /snap
+    fi
+    
+    # Wait briefly for snapd socket to fully initialize
+    echo "Waiting for snapd to initialize..."
+    sleep 5
+    
+    echo "Installing Spotify (Revision 89)..."
+    $SUDO snap install spotify --revision=89
 fi
 
 # ==========================================
@@ -111,9 +131,9 @@ if ask_install "Custom GNOME Keybindings"; then
     P3="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/"
     P4="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/"
 
-    # Spotify
+    # Spotify (Updated for Snap)
     gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P0 name 'Spotify'
-    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P0 command 'flatpak run com.spotify.Client'
+    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P0 command 'snap run spotify'
     gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P0 binding '<Alt><Shift>s'
 
     # Terminal
