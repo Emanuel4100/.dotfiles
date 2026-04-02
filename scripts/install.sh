@@ -47,6 +47,32 @@ if ask_install "DNF General Packages (git, kitty, nvim, etc)"; then
 fi
 
 # ==========================================
+# STOW DOTFILES
+# ==========================================
+if ask_install "Stow Dotfiles (Link config files)"; then
+    echo "Stowing dotfiles..."
+    
+    # חובה לנווט לתיקיית ה-dotfiles כדי ש-stow יעבוד נכון ביחס לתיקיית הבית
+    cd ~/.dotfiles || { echo "❌ Could not find ~/.dotfiles"; exit 1; }
+    
+    # רשימת התיקיות שמכילות את קבצי ההגדרות
+    STOW_FOLDERS=(fastfetch fish hypr kitty quickshell rofi)
+    
+    for folder in "${STOW_FOLDERS[@]}"; do
+        if [ -d "$folder" ]; then
+            echo "Linking $folder..."
+            stow -R "$folder"
+        else
+            echo "⚠️ Directory $folder not found, skipping."
+        fi
+    done
+    
+    echo "✅ Dotfiles linked successfully!"
+    # חזרה לתיקיית המקור כדי לא לשבש את המשך הסקריפט
+    cd - > /dev/null
+fi
+
+# ==========================================
 # BRAVE BROWSER
 # ==========================================
 if ask_install "Brave Browser"; then
@@ -58,7 +84,8 @@ fi
 # ==========================================
 if ask_install "Visual Studio Code"; then
     $SUDO rpm --import https://packages.microsoft.com/keys/microsoft.asc
-    cat <<EOF | $SUDO tee /etc/yum.repos.d/vscode.repo
+    
+    $SUDO tee /etc/yum.repos.d/vscode.repo > /dev/null << 'EOF'
 [code]
 name=Visual Studio Code
 baseurl=https://packages.microsoft.com/yumrepos/vscode
@@ -66,6 +93,7 @@ enabled=1
 gpgcheck=1
 gpgkey=https://packages.microsoft.com/keys/microsoft.asc
 EOF
+
     $SUDO dnf install -y code
 fi
 
@@ -162,6 +190,20 @@ if ask_install "Custom GNOME Keybindings"; then
     # Register all
     gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$P0', '$P1', '$P2', '$P3', '$P4']"
     echo "Setup custom GNOME Keybindings"
+fi
+
+# ==========================================
+# GNOME EXTENSIONS
+# ==========================================
+if ask_install "GNOME Extensions"; then
+    echo "Installing GNOME Extensions..."
+    EXTENSIONS_SCRIPT="$HOME/.dotfiles/scripts/install_gnome_extensions.sh"
+    
+    if [ -f "$EXTENSIONS_SCRIPT" ]; then
+        bash "$EXTENSIONS_SCRIPT"
+    else
+        echo "⚠️ Error: Could not find $EXTENSIONS_SCRIPT. Skipping..."
+    fi
 fi
 
 # ==========================================
