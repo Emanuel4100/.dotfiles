@@ -1,5 +1,9 @@
 # Emanuel's  dotfiles
 My Hyprland dotfiles to my own OS experience
+```bash
+# installer script
+git clone https://github.com/emanuel4100/.dotfiles.git ~/.dotfiles && cd ~/.dotfiles && bash scripts/install.sh
+```
 ## Default Components -
 ### Essentials
 * Authenticaion agent - hyprpolkitagent
