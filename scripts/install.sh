@@ -197,6 +197,7 @@ if ask_install "Snap Apps (Spotify)"; then
     
     info "Installing Spotify (Revision 89)..."
     if $SUDO snap install spotify --revision=89; then
+	sudo snap refresh --hold=forever spotify
         success "Spotify installed successfully."
     else
         error "Failed to install Spotify. You might need to restart your PC and run: sudo snap install spotify"
