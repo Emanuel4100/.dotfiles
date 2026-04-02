@@ -1,5 +1,4 @@
 
-```markdown
 # Emanuel's Fedora Dotfiles
 
 My custom dotfiles and automated setup script tailored for **Fedora Linux**. This setup provides a complete, beautifully configured **Hyprland** environment alongside carefully selected GNOME tweaks, terminal utilities, and daily-driver applications.
