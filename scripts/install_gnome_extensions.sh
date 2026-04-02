@@ -2,6 +2,7 @@
 
 # List of extensions to install
 EXTENSIONS=(
+    "appindicatorsupport@rgcjonas.gmail.com"
     "gsconnect@andyholmes.github.io"
     "dash-to-dock@micxgx.gmail.com"
     "simple-weather@romanlefler.com"
@@ -19,7 +20,7 @@ EXTENSIONS=(
 )
 
 # Ensure required commands are available
-for cmd in curl jq unzip gnome-extensions; do
+for cmd in curl jq gnome-extensions; do
     if ! command -v "$cmd" &> /dev/null; then
         echo "Error: '$cmd' is not installed. Please install it and try again."
         exit 1
@@ -45,14 +46,20 @@ for UUID in "${EXTENSIONS[@]}"; do
     echo "------------------------------------------------"
     echo "Processing: $UUID"
     
-    # Query the GNOME Extensions API for the download link
-    RESPONSE=$(curl -s "https://extensions.gnome.org/extension-info/?uuid=${UUID}&shell_version=${GNOME_VERSION}")
-    DOWNLOAD_URL=$(echo "$RESPONSE" | jq -r '.download_url // empty')
+    # Query the GNOME Extensions API for the extension info
+    RESPONSE=$(curl -s "https://extensions.gnome.org/extension-info/?uuid=${UUID}")
     
-    if [ -z "$DOWNLOAD_URL" ]; then
+    # Extract the specific version tag (pk) matching the user's GNOME version
+    # 2>/dev/null suppresses jq errors if the UUID is invalid or curling fails
+    VERSION_TAG=$(echo "$RESPONSE" | jq -r ".shell_version_map[\"${GNOME_VERSION}\"].pk // empty" 2>/dev/null)
+    
+    if [ -z "$VERSION_TAG" ]; then
         echo "  -> Error: Could not find a compatible version of this extension for GNOME $GNOME_VERSION."
         continue
     fi
+    
+    # Construct the correct download URL
+    DOWNLOAD_URL="/download-extension/${UUID}.shell-extension.zip?version_tag=${VERSION_TAG}"
     
     # Download the extension zip
     echo "  -> Downloading..."
@@ -70,4 +77,4 @@ for UUID in "${EXTENSIONS[@]}"; do
 done
 
 echo "------------------------------------------------"
-echo "All done! Note: You may need to log out and log back in for all changes to properly take effect."
+echo "All done! Note: You may need to log out and log back in (or press Alt+F2, type 'r', and hit Enter on X11) for all changes to properly take effect."
