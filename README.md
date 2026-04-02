@@ -68,4 +68,3 @@ These are the global custom keybindings configured via the setup script (GNOME/H
 * `fish/`, `kitty/`, `rofi/`, `hypr/`, `quickshell/` - Configuration directories ready to be stowed.
 
 > **Note:** After running the installation script, it is highly recommended to **reboot** your system for all changes, shell overrides, and keybindings to take full effect.
-```
