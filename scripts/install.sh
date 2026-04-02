@@ -69,7 +69,7 @@ success "System is up to date."
 # ==========================================
 if ask_install "DNF General Packages (git, kitty, nvim, etc)"; then
     info "Installing DNF packages..."
-    PACKAGES=(git gh kitty fastfetch stow fish gnome-tweaks gnome-pomodoro wl-clipboard neovim)
+    PACKAGES=(git gh kitty fastfetch stow fish gnome-tweaks gnome-pomodoro wl-clipboard neovim openssl fontconfig)
     $SUDO dnf install -y "${PACKAGES[@]}"
     success "DNF packages installed."
 fi
@@ -95,6 +95,26 @@ if ask_install "Stow Dotfiles (Link config files)"; then
     
     success "Dotfiles linked successfully!"
     cd - > /dev/null
+fi
+
+# ==========================================
+# INSTALL CUSTOM FONTS
+# ==========================================
+if ask_install "Custom Fonts (JetBrainsMono Nerd Font)"; then
+    info "Installing Custom Fonts..."
+    FONT_DIR="$HOME/.local/share/fonts"
+    SOURCE_FONTS="$HOME/.dotfiles/assets/fonts"
+    
+    if [ -d "$SOURCE_FONTS" ]; then
+        mkdir -p "$FONT_DIR"
+        cp -r "$SOURCE_FONTS"/* "$FONT_DIR/"
+        
+        info "Rebuilding font cache..."
+        fc-cache -fv >/dev/null 2>&1
+        success "Fonts installed and cache updated."
+    else
+        warning "Could not find fonts directory at $SOURCE_FONTS. Skipping..."
+    fi
 fi
 
 # ==========================================
@@ -132,17 +152,21 @@ fi
 if ask_install "Flatpak Apps (Obsidian, Resources, etc)"; then
     info "Setting up Flatpak and Flathub..."
     $SUDO dnf install -y flatpak
-    flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+    $SUDO flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
     
     FLATPAK_APPS=(
         "com.github.tchx84.Flatseal"
-        "io.github.giantpinkrobots.flathub.ExtensionManager"
+        "com.mattjakeman.ExtensionManager"
         "md.obsidian.Obsidian"
         "com.rtosta.zapzap"
         "net.nokyan.Resources"
     )
+    
     info "Installing Flatpak apps..."
-    flatpak install -y flathub "${FLATPAK_APPS[@]}"
+    for app in "${FLATPAK_APPS[@]}"; do
+        echo "  -> Installing $app..."
+        $SUDO flatpak install -y flathub "$app"
+    done
     success "Flatpak apps installed."
 fi
 
@@ -152,18 +176,31 @@ fi
 if ask_install "Snap Apps (Spotify)"; then
     info "Installing snapd..."
     $SUDO dnf install -y snapd
+    
+    # Enable both the socket and the actual service
     $SUDO systemctl enable --now snapd.socket
+    $SUDO systemctl enable --now snapd.service
     
     if [ ! -L /snap ]; then
         $SUDO ln -s /var/lib/snapd/snap /snap
     fi
     
-    info "Waiting for snapd to initialize..."
-    sleep 5
+    info "Waiting for snapd to fully initialize (this may take a minute)..."
     
-    info "Installing Spotify..."
-    $SUDO snap install spotify --revision=89
-    success "Spotify installed."
+    # 1. Loop until the snap command becomes responsive
+    until $SUDO snap version >/dev/null 2>&1; do
+        sleep 2
+    done
+    
+    # 2. Wait for snapd to finish its internal background setup (seeding)
+    $SUDO snap wait system seed
+    
+    info "Installing Spotify (Revision 89)..."
+    if $SUDO snap install spotify --revision=89; then
+        success "Spotify installed successfully."
+    else
+        error "Failed to install Spotify. You might need to restart your PC and run: sudo snap install spotify"
+    fi
 fi
 
 # ==========================================

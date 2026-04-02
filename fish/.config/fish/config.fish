@@ -5,3 +5,4 @@ end
 
 # opencode
 fish_add_path /home/emanuel/.opencode/bin
+alias files='nautilus .'
