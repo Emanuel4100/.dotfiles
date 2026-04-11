@@ -23,8 +23,10 @@ if [[ $EUID -eq 0 ]]; then
 fi
 
 SUDO="sudo"
-# Automatically point to the hyprland install script in your dotfiles
-HYPR_PATH="$HOME/.dotfiles/scripts/install_hypr.sh"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+HYPR_PATH="$DOTFILES_ROOT/scripts/install_hypr.sh"
 
 # ==========================================
 # INSTALLATION MODE SELECTION
@@ -79,11 +81,11 @@ fi
 # ==========================================
 if ask_install "Stow Dotfiles (Link config files)"; then
     info "Stowing dotfiles..."
-    
-    cd ~/.dotfiles || { error "Could not find ~/.dotfiles"; exit 1; }
-    
-    STOW_FOLDERS=(fastfetch fish hypr kitty quickshell rofi)
-    
+
+    cd "$DOTFILES_ROOT" || { error "Could not find dotfiles at $DOTFILES_ROOT"; exit 1; }
+
+    STOW_FOLDERS=(fastfetch fish kitty rofi)
+
     for folder in "${STOW_FOLDERS[@]}"; do
         if [ -d "$folder" ]; then
             echo "  -> Linking $folder..."
@@ -92,7 +94,12 @@ if ask_install "Stow Dotfiles (Link config files)"; then
             warning "Directory $folder not found, skipping."
         fi
     done
-    
+
+    if [ -x "$DOTFILES_ROOT/scripts/setup_rofi.sh" ]; then
+        info "Installing Rofi themes to ~/.local/share/rofi/themes..."
+        bash "$DOTFILES_ROOT/scripts/setup_rofi.sh"
+    fi
+
     success "Dotfiles linked successfully!"
     cd - > /dev/null
 fi
@@ -103,15 +110,22 @@ fi
 if ask_install "Custom Fonts (JetBrainsMono Nerd Font)"; then
     info "Installing Custom Fonts..."
     FONT_DIR="$HOME/.local/share/fonts"
-    SOURCE_FONTS="$HOME/.dotfiles/assets/fonts"
+    # Drop font files into assets/fonts/ in the repo (see .gitkeep), or install via dnf.
+    SOURCE_FONTS="$DOTFILES_ROOT/assets/fonts"
     
     if [ -d "$SOURCE_FONTS" ]; then
-        mkdir -p "$FONT_DIR"
-        cp -r "$SOURCE_FONTS"/* "$FONT_DIR/"
-        
-        info "Rebuilding font cache..."
-        fc-cache -fv >/dev/null 2>&1
-        success "Fonts installed and cache updated."
+        shopt -s nullglob
+        font_files=("$SOURCE_FONTS"/*.ttf "$SOURCE_FONTS"/*.otf "$SOURCE_FONTS"/*.ttc \
+            "$SOURCE_FONTS"/*.TTF "$SOURCE_FONTS"/*.OTF "$SOURCE_FONTS"/*.TTC)
+        if ((${#font_files[@]} == 0)); then
+            warning "No font files (.ttf/.otf/.ttc) in $SOURCE_FONTS. Add fonts or install via dnf. Skipping..."
+        else
+            mkdir -p "$FONT_DIR"
+            cp -f "${font_files[@]}" "$FONT_DIR/"
+            info "Rebuilding font cache..."
+            fc-cache -fv >/dev/null 2>&1
+            success "Fonts installed and cache updated."
+        fi
     else
         warning "Could not find fonts directory at $SOURCE_FONTS. Skipping..."
     fi
@@ -153,21 +167,20 @@ if ask_install "Flatpak Apps (Obsidian, Resources, etc)"; then
     info "Setting up Flatpak and Flathub..."
     $SUDO dnf install -y flatpak
     $SUDO flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-    
-    FLATPAK_APPS=(
-        "com.github.tchx84.Flatseal"
-        "com.mattjakeman.ExtensionManager"
-        "md.obsidian.Obsidian"
-        "com.rtosta.zapzap"
-        "net.nokyan.Resources"
-    )
-    
-    info "Installing Flatpak apps..."
-    for app in "${FLATPAK_APPS[@]}"; do
-        echo "  -> Installing $app..."
-        $SUDO flatpak install -y flathub "$app"
-    done
-    success "Flatpak apps installed."
+
+    FLATPAK_MANIFEST="$DOTFILES_ROOT/packages.flatpak.txt"
+    if [[ ! -f "$FLATPAK_MANIFEST" ]]; then
+        warning "Could not find $FLATPAK_MANIFEST. Skipping Flatpak app installs."
+    else
+        info "Installing Flatpak apps..."
+        while IFS= read -r line || [[ -n "$line" ]]; do
+            [[ "$line" =~ ^[[:space:]]*$ ]] && continue
+            [[ "$line" =~ ^[[:space:]]*# ]] && continue
+            echo "  -> Installing $line..."
+            $SUDO flatpak install -y flathub "$line"
+        done < "$FLATPAK_MANIFEST"
+        success "Flatpak apps installed."
+    fi
 fi
 
 # ==========================================
@@ -197,7 +210,7 @@ if ask_install "Snap Apps (Spotify)"; then
     
     info "Installing Spotify (Revision 89)..."
     if $SUDO snap install spotify --revision=89; then
-	sudo snap refresh --hold=forever spotify
+        $SUDO snap refresh --hold=forever spotify
         success "Spotify installed successfully."
     else
         error "Failed to install Spotify. You might need to restart your PC and run: sudo snap install spotify"
@@ -211,6 +224,17 @@ if ask_install "Hyprland Component"; then
     if [ -f "$HYPR_PATH" ]; then
         info "Running Hyprland install script..."
         bash "$HYPR_PATH"
+        info "Stowing Hyprland-related dotfiles (hypr, quickshell)..."
+        cd "$DOTFILES_ROOT" || exit 1
+        for folder in hypr quickshell; do
+            if [ -d "$folder" ]; then
+                echo "  -> Linking $folder..."
+                stow -R "$folder"
+            else
+                warning "Directory $folder not found, skipping."
+            fi
+        done
+        cd - > /dev/null
         success "Hyprland setup complete."
     else
         warning "Hyprland install script not found at $HYPR_PATH"
@@ -267,7 +291,7 @@ fi
 # ==========================================
 if ask_install "GNOME Extensions"; then
     info "Installing GNOME Extensions..."
-    EXTENSIONS_SCRIPT="$HOME/.dotfiles/scripts/install_gnome_extensions.sh"
+    EXTENSIONS_SCRIPT="$DOTFILES_ROOT/scripts/install_gnome_extensions.sh"
     
     if [ -f "$EXTENSIONS_SCRIPT" ]; then
         bash "$EXTENSIONS_SCRIPT"
@@ -280,30 +304,22 @@ fi
 # ==========================================
 # FINAL STEPS
 # ==========================================
-if ask_install "Shell customization (Fish & Aliases)"; then
+if ask_install "Shell customization (set default shell to Fish)"; then
     info "Changing default shell to fish..."
     chsh -s /usr/bin/fish
-
-    info "Adding custom aliases to fish config..."
-    mkdir -p ~/.config/fish
-    
-    # Safe append: Checks if the alias already exists before adding it
-    if ! grep -q "alias files='nautilus .'" ~/.config/fish/config.fish 2>/dev/null; then
-        echo "alias files='nautilus .'" >> ~/.config/fish/config.fish
-    fi
-    success "Shell customized."
+    success "Default shell set to fish (aliases live in stowed fish config)."
 fi
 
 if ask_install "GRUB Theme"; then
     info "Setting up GRUB Theme..."
-    GRUB_SCRIPT="$HOME/.dotfiles/scripts/install-grub-theme.sh"
+    GRUB_SCRIPT="$DOTFILES_ROOT/scripts/install-grub-theme.sh"
     if [ -f "$GRUB_SCRIPT" ]; then
         bash "$GRUB_SCRIPT"
         success "GRUB Theme applied."
     else
         # Fallback if the script isn't found
         $SUDO mkdir -p /boot/grub2/themes
-        $SUDO cp -r ~/.dotfiles/assets/grub-themes/fedora /boot/grub2/themes/
+        $SUDO cp -r "$DOTFILES_ROOT/assets/grub-themes/fedora" /boot/grub2/themes/
         success "GRUB Theme files copied (Update grub manually)."
     fi
 fi

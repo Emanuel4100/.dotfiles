@@ -4,5 +4,7 @@ if status is-interactive
 end
 
 # opencode
-fish_add_path /home/emanuel/.opencode/bin
+if test -d "$HOME/.opencode/bin"
+    fish_add_path "$HOME/.opencode/bin"
+end
 alias files='nautilus .'

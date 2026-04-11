@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Define the source and destination paths
-THEME_SOURCE="$HOME/.dotfiles/assets/grub-themes/fedora"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+THEME_SOURCE="$DOTFILES_ROOT/assets/grub-themes/fedora"
 THEME_DEST="/boot/grub2/themes/fedora"
 GRUB_DEFAULT="/etc/default/grub"
 

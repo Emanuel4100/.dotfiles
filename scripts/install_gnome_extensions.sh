@@ -77,4 +77,5 @@ for UUID in "${EXTENSIONS[@]}"; do
 done
 
 echo "------------------------------------------------"
-echo "All done! Note: You may need to log out and log back in (or press Alt+F2, type 'r', and hit Enter on X11) for all changes to properly take effect."
+echo "All done! On Wayland (Fedora default), log out and back in (or reboot) for extensions to load reliably."
+echo "On X11 only, Alt+F2 then 'r' can restart GNOME Shell instead."
