@@ -1,4 +1,4 @@
-# Flathub app IDs installed by scripts/install.sh (Flatpak step). One ID per line.
+# Flathub app IDs for scripts/install.sh (manifests/packages.flatpak.txt). One ID per line.
 com.github.tchx84.Flatseal
 com.mattjakeman.ExtensionManager
 md.obsidian.Obsidian

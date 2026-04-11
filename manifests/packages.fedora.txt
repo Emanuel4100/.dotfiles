@@ -1,4 +1,4 @@
-# DNF packages installed by scripts/install.sh (general packages step). Edit install.sh to change the set.
+# DNF packages reference for scripts/install.sh (manifests/packages.fedora.txt). Edit install.sh to change the live set.
 fastfetch
 fish
 fontconfig

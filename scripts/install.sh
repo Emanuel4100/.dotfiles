@@ -26,6 +26,7 @@ SUDO="sudo"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+STOW_DIR="$DOTFILES_ROOT/stow"
 HYPR_PATH="$DOTFILES_ROOT/scripts/install_hypr.sh"
 
 # ==========================================
@@ -82,14 +83,14 @@ fi
 if ask_install "Stow Dotfiles (Link config files)"; then
     info "Stowing dotfiles..."
 
-    cd "$DOTFILES_ROOT" || { error "Could not find dotfiles at $DOTFILES_ROOT"; exit 1; }
+    cd "$STOW_DIR" || { error "Could not find stow directory at $STOW_DIR"; exit 1; }
 
     STOW_FOLDERS=(fastfetch fish kitty rofi)
 
     for folder in "${STOW_FOLDERS[@]}"; do
         if [ -d "$folder" ]; then
             echo "  -> Linking $folder..."
-            stow -R "$folder"
+            stow -R -t "$HOME" "$folder"
         else
             warning "Directory $folder not found, skipping."
         fi
@@ -168,7 +169,7 @@ if ask_install "Flatpak Apps (Obsidian, Resources, etc)"; then
     $SUDO dnf install -y flatpak
     $SUDO flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
-    FLATPAK_MANIFEST="$DOTFILES_ROOT/packages.flatpak.txt"
+    FLATPAK_MANIFEST="$DOTFILES_ROOT/manifests/packages.flatpak.txt"
     if [[ ! -f "$FLATPAK_MANIFEST" ]]; then
         warning "Could not find $FLATPAK_MANIFEST. Skipping Flatpak app installs."
     else
@@ -225,11 +226,11 @@ if ask_install "Hyprland Component"; then
         info "Running Hyprland install script..."
         bash "$HYPR_PATH"
         info "Stowing Hyprland-related dotfiles (hypr, quickshell)..."
-        cd "$DOTFILES_ROOT" || exit 1
+        cd "$STOW_DIR" || exit 1
         for folder in hypr quickshell; do
             if [ -d "$folder" ]; then
                 echo "  -> Linking $folder..."
-                stow -R "$folder"
+                stow -R -t "$HOME" "$folder"
             else
                 warning "Directory $folder not found, skipping."
             fi

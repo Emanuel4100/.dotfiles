@@ -1,3 +1,6 @@
 *.swp
 *~
 .DS_Store
+
+# Fish writes universals here; do not track in the stow package
+stow/fish/.config/fish/fish_variables
