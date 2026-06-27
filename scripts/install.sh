@@ -259,6 +259,7 @@ if ask_install "Custom GNOME Keybindings"; then
     P2="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/"
     P3="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/"
     P4="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/"
+    P5="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom5/"
 
     gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P0 name 'Spotify'
     gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P0 command 'snap run spotify'
@@ -282,7 +283,11 @@ if ask_install "Custom GNOME Keybindings"; then
     gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P3 command 'flatpak run net.nokyan.Resources'
     gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P3 binding '<Control><Shift>grave'
 
-    gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$P0', '$P1', '$P2', '$P3', '$P4']"
+    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P5 name 'Vicinae'
+    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P5 command 'vicinae toggle'
+    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P5 binding '<Super>f'
+
+    gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$P0', '$P1', '$P2', '$P3', '$P4', '$P5']"
     
     success "GNOME Keybindings configured."
 fi
@@ -327,3 +332,4 @@ fi
 
 echo "------------------------------------------"
 success "🎉 Installation script finished successfully! Please reboot your system for all changes to take effect."
+```</Super></Control>

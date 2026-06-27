@@ -8,6 +8,13 @@ function fish_prompt
     set -l grey 3b4048
     set -l white abb2bf
 
+    # Distrobox indicator
+    if set -q CONTAINER_ID
+        set_color -o cyan
+        echo -n "📦 [$CONTAINER_ID] "
+        set_color normal
+    end
+
     # Icons
     set -l icon_os "  " # Change based on your OS
     set -l icon_dir " "
