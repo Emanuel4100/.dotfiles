@@ -279,8 +279,8 @@ if ask_install "Custom GNOME Keybindings"; then
     gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P4 command 'code'
     gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P4 binding '<Super>v'
     
-    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P3 name 'Resources'
-    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P3 command 'flatpak run net.nokyan.Resources'
+    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P3 name 'Misson Center'
+    gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P3 command 'flatpak run io.missioncenter.MissionCenter'
     gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P3 binding '<Control><Shift>grave'
 
     gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$P5 name 'Vicinae'
